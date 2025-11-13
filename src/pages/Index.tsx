@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
@@ -81,7 +80,8 @@ const WEAPONS: WeaponConfig[] = [
 ];
 
 const Index = () => {
-  const [screen, setScreen] = useState<'menu' | 'game' | 'records'>('menu');
+  const [screen, setScreen] = useState<'menu' | 'game'>('menu');
+  const [currentTab, setCurrentTab] = useState<'training' | 'weapons' | 'records'>('training');
   const [gameMode, setGameMode] = useState<'disassembly' | 'assembly'>('disassembly');
   const [selectedWeapon, setSelectedWeapon] = useState<WeaponConfig>(WEAPONS[0]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -214,146 +214,159 @@ const Index = () => {
 
         {screen === 'menu' && (
           <div className="max-w-6xl mx-auto animate-scale-in">
-            <Tabs defaultValue="training" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8 bg-[#221F26]">
-                <TabsTrigger value="training" className="data-[state=active]:bg-[#8B5CF6]">
-                  <Icon name="Target" size={20} className="mr-2" />
-                  Тренировка
-                </TabsTrigger>
-                <TabsTrigger value="weapons" className="data-[state=active]:bg-[#8B5CF6]">
-                  <Icon name="Shield" size={20} className="mr-2" />
-                  Оружие
-                </TabsTrigger>
-                <TabsTrigger value="records" className="data-[state=active]:bg-[#8B5CF6]">
-                  <Icon name="Trophy" size={20} className="mr-2" />
-                  Рекорды
-                </TabsTrigger>
-              </TabsList>
+            <div className="flex justify-center gap-4 mb-8 flex-wrap">
+              <Button
+                size="lg"
+                variant={currentTab === 'training' ? 'default' : 'outline'}
+                className={currentTab === 'training' ? 'bg-[#8B5CF6] hover:bg-[#7E69AB]' : 'border-[#8B5CF6] text-white hover:bg-[#8B5CF6]/20'}
+                onClick={() => setCurrentTab('training')}
+              >
+                <Icon name="Target" size={20} className="mr-2" />
+                Тренировка
+              </Button>
+              <Button
+                size="lg"
+                variant={currentTab === 'weapons' ? 'default' : 'outline'}
+                className={currentTab === 'weapons' ? 'bg-[#8B5CF6] hover:bg-[#7E69AB]' : 'border-[#8B5CF6] text-white hover:bg-[#8B5CF6]/20'}
+                onClick={() => setCurrentTab('weapons')}
+              >
+                <Icon name="Shield" size={20} className="mr-2" />
+                Оружие
+              </Button>
+              <Button
+                size="lg"
+                variant={currentTab === 'records' ? 'default' : 'outline'}
+                className={currentTab === 'records' ? 'bg-[#8B5CF6] hover:bg-[#7E69AB]' : 'border-[#8B5CF6] text-white hover:bg-[#8B5CF6]/20'}
+                onClick={() => setCurrentTab('records')}
+              >
+                <Icon name="Trophy" size={20} className="mr-2" />
+                Рекорды
+              </Button>
+            </div>
 
-              <TabsContent value="training" className="animate-fade-in">
-                <Card className="bg-[#221F26] border-[#8B5CF6] border-2 p-12 text-center">
-                  <Icon name="Crosshair" size={80} className="mx-auto mb-6 text-[#8B5CF6]" />
-                  <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Oswald, sans-serif' }}>
-                    ВЫБЕРИТЕ РЕЖИМ ТРЕНИРОВКИ
-                  </h2>
-                  
-                  <div className="mb-8">
-                    <label className="block text-sm text-[#8A898C] mb-3">Выберите оружие:</label>
-                    <Select defaultValue="pistol" onValueChange={(id) => setSelectedWeapon(WEAPONS.find(w => w.id === id) || WEAPONS[0])}>
-                      <SelectTrigger className="w-full max-w-md mx-auto bg-[#1A1F2C] border-[#8B5CF6]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#1A1F2C] border-[#8B5CF6]">
-                        {WEAPONS.map(weapon => (
-                          <SelectItem key={weapon.id} value={weapon.id}>
-                            {weapon.name} - {weapon.difficulty === 'easy' ? '⭐' : weapon.difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div 
-                      className="bg-[#1A1F2C] p-8 rounded-lg hover-scale cursor-pointer border-2 border-transparent hover:border-[#0EA5E9] transition-all"
-                      onClick={() => startGame('disassembly', selectedWeapon)}
-                    >
-                      <Icon name="CircleMinus" size={60} className="mx-auto mb-4 text-[#0EA5E9]" />
-                      <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Oswald, sans-serif' }}>РАЗБОРКА</h3>
-                      <p className="text-sm text-[#8A898C] mb-4">Разберите оружие на детали в правильном порядке</p>
-                      <Badge variant="outline" className="border-[#0EA5E9] text-[#0EA5E9]">
-                        {selectedWeapon.parts.length} деталей
-                      </Badge>
-                    </div>
-
-                    <div 
-                      className="bg-[#1A1F2C] p-8 rounded-lg hover-scale cursor-pointer border-2 border-transparent hover:border-[#D946EF] transition-all"
-                      onClick={() => startGame('assembly', selectedWeapon)}
-                    >
-                      <Icon name="CirclePlus" size={60} className="mx-auto mb-4 text-[#D946EF]" />
-                      <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Oswald, sans-serif' }}>СБОРКА</h3>
-                      <p className="text-sm text-[#8A898C] mb-4">Соберите оружие из деталей в правильной последовательности</p>
-                      <Badge variant="outline" className="border-[#D946EF] text-[#D946EF]">
-                        {selectedWeapon.parts.length} деталей
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-4 p-4 bg-[#1A1F2C] rounded-lg">
-                    <Icon name="Glasses" size={32} className="text-[#F97316]" />
-                    <div className="text-left">
-                      <p className="font-semibold">VR-режим</p>
-                      <p className="text-sm text-[#8A898C]">Включите для эффекта присутствия</p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      className={`ml-auto ${vrMode ? 'bg-[#F97316] border-[#F97316]' : 'border-[#8A898C]'}`}
-                      onClick={() => setVrMode(!vrMode)}
-                    >
-                      {vrMode ? 'Включен' : 'Выключен'}
-                    </Button>
-                  </div>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="weapons" className="animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {WEAPONS.map(weapon => (
-                    <Card key={weapon.id} className="bg-[#221F26] border-[#8B5CF6] p-6 hover-scale">
-                      <Icon name={weapon.icon as any} size={60} className="mx-auto mb-4 text-[#8B5CF6]" />
-                      <h3 className="text-xl font-bold mb-2 text-center" style={{ fontFamily: 'Oswald, sans-serif' }}>
-                        {weapon.name}
-                      </h3>
-                      <div className="flex justify-center gap-2 mb-4">
-                        <Badge variant={weapon.difficulty === 'easy' ? 'default' : 'outline'} className="bg-[#0EA5E9]">
-                          {weapon.difficulty === 'easy' && 'Легко'}
-                          {weapon.difficulty === 'medium' && 'Средне'}
-                          {weapon.difficulty === 'hard' && 'Сложно'}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2 text-sm text-[#8A898C]">
-                        <p>Деталей: {weapon.parts.length}</p>
-                        <p>Режимы: Разборка, Сборка</p>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="records" className="animate-fade-in">
-                <Card className="bg-[#221F26] border-[#8B5CF6] p-8">
-                  <h2 className="text-3xl font-bold mb-6 text-center" style={{ fontFamily: 'Oswald, sans-serif' }}>
-                    ТАБЛИЦА РЕКОРДОВ
-                  </h2>
-                  {records.length > 0 ? (
-                    <div className="space-y-3">
-                      {records.map((record, index) => (
-                        <div key={index} className="bg-[#1A1F2C] p-4 rounded-lg flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
-                            index === 0 ? 'bg-[#D946EF]' : index === 1 ? 'bg-[#8B5CF6]' : index === 2 ? 'bg-[#0EA5E9]' : 'bg-[#8A898C]'
-                          }`}>
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold">{record.weapon}</p>
-                            <p className="text-sm text-[#8A898C]">{record.mode} • {record.date}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-[#0EA5E9]">{record.score}</p>
-                            <p className="text-sm text-[#8A898C]">{formatTime(record.time)}</p>
-                          </div>
-                        </div>
+            {currentTab === 'training' && (
+              <Card className="bg-[#221F26] border-[#8B5CF6] border-2 p-12 text-center animate-fade-in">
+                <Icon name="Crosshair" size={80} className="mx-auto mb-6 text-[#8B5CF6]" />
+                <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Oswald, sans-serif' }}>
+                  ВЫБЕРИТЕ РЕЖИМ ТРЕНИРОВКИ
+                </h2>
+                
+                <div className="mb-8">
+                  <label className="block text-sm text-[#8A898C] mb-3">Выберите оружие:</label>
+                  <Select defaultValue="pistol" onValueChange={(id) => setSelectedWeapon(WEAPONS.find(w => w.id === id) || WEAPONS[0])}>
+                    <SelectTrigger className="w-full max-w-md mx-auto bg-[#1A1F2C] border-[#8B5CF6]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1A1F2C] border-[#8B5CF6]">
+                      {WEAPONS.map(weapon => (
+                        <SelectItem key={weapon.id} value={weapon.id}>
+                          {weapon.name} - {weapon.difficulty === 'easy' ? '⭐' : weapon.difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐'}
+                        </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div 
+                    className="bg-[#1A1F2C] p-8 rounded-lg hover-scale cursor-pointer border-2 border-transparent hover:border-[#0EA5E9] transition-all"
+                    onClick={() => startGame('disassembly', selectedWeapon)}
+                  >
+                    <Icon name="CircleMinus" size={60} className="mx-auto mb-4 text-[#0EA5E9]" />
+                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Oswald, sans-serif' }}>РАЗБОРКА</h3>
+                    <p className="text-sm text-[#8A898C] mb-4">Разберите оружие на детали в правильном порядке</p>
+                    <Badge variant="outline" className="border-[#0EA5E9] text-[#0EA5E9]">
+                      {selectedWeapon.parts.length} деталей
+                    </Badge>
+                  </div>
+
+                  <div 
+                    className="bg-[#1A1F2C] p-8 rounded-lg hover-scale cursor-pointer border-2 border-transparent hover:border-[#D946EF] transition-all"
+                    onClick={() => startGame('assembly', selectedWeapon)}
+                  >
+                    <Icon name="CirclePlus" size={60} className="mx-auto mb-4 text-[#D946EF]" />
+                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Oswald, sans-serif' }}>СБОРКА</h3>
+                    <p className="text-sm text-[#8A898C] mb-4">Соберите оружие из деталей в правильной последовательности</p>
+                    <Badge variant="outline" className="border-[#D946EF] text-[#D946EF]">
+                      {selectedWeapon.parts.length} деталей
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center gap-4 p-4 bg-[#1A1F2C] rounded-lg">
+                  <Icon name="Glasses" size={32} className="text-[#F97316]" />
+                  <div className="text-left">
+                    <p className="font-semibold">VR-режим</p>
+                    <p className="text-sm text-[#8A898C]">Включите для эффекта присутствия</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className={`ml-auto ${vrMode ? 'bg-[#F97316] border-[#F97316]' : 'border-[#8A898C]'}`}
+                    onClick={() => setVrMode(!vrMode)}
+                  >
+                    {vrMode ? 'Включен' : 'Выключен'}
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {currentTab === 'weapons' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                {WEAPONS.map(weapon => (
+                  <Card key={weapon.id} className="bg-[#221F26] border-[#8B5CF6] p-6 hover-scale">
+                    <Icon name={weapon.icon as any} size={60} className="mx-auto mb-4 text-[#8B5CF6]" />
+                    <h3 className="text-xl font-bold mb-2 text-center" style={{ fontFamily: 'Oswald, sans-serif' }}>
+                      {weapon.name}
+                    </h3>
+                    <div className="flex justify-center gap-2 mb-4">
+                      <Badge variant={weapon.difficulty === 'easy' ? 'default' : 'outline'} className="bg-[#0EA5E9]">
+                        {weapon.difficulty === 'easy' && 'Легко'}
+                        {weapon.difficulty === 'medium' && 'Средне'}
+                        {weapon.difficulty === 'hard' && 'Сложно'}
+                      </Badge>
                     </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <Icon name="Trophy" size={80} className="mx-auto mb-4 text-[#8A898C]" />
-                      <p className="text-[#8A898C]">Пока нет рекордов. Начните тренировку!</p>
+                    <div className="space-y-2 text-sm text-[#8A898C]">
+                      <p>Деталей: {weapon.parts.length}</p>
+                      <p>Режимы: Разборка, Сборка</p>
                     </div>
-                  )}
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {currentTab === 'records' && (
+              <Card className="bg-[#221F26] border-[#8B5CF6] p-8 animate-fade-in">
+                <h2 className="text-3xl font-bold mb-6 text-center" style={{ fontFamily: 'Oswald, sans-serif' }}>
+                  ТАБЛИЦА РЕКОРДОВ
+                </h2>
+                {records.length > 0 ? (
+                  <div className="space-y-3">
+                    {records.map((record, index) => (
+                      <div key={index} className="bg-[#1A1F2C] p-4 rounded-lg flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
+                          index === 0 ? 'bg-[#D946EF]' : index === 1 ? 'bg-[#8B5CF6]' : index === 2 ? 'bg-[#0EA5E9]' : 'bg-[#8A898C]'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold">{record.weapon}</p>
+                          <p className="text-sm text-[#8A898C]">{record.mode} • {record.date}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-[#0EA5E9]">{record.score}</p>
+                          <p className="text-sm text-[#8A898C]">{formatTime(record.time)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Icon name="Trophy" size={80} className="mx-auto mb-4 text-[#8A898C]" />
+                    <p className="text-[#8A898C]">Пока нет рекордов. Начните тренировку!</p>
+                  </div>
+                )}
+              </Card>
+            )}
           </div>
         )}
 
@@ -457,7 +470,7 @@ const Index = () => {
                 <p className="text-2xl font-bold mb-4">
                   Итоговый счёт: {score} очков
                 </p>
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-4 justify-center flex-wrap">
                   <Button 
                     size="lg" 
                     className="bg-white text-[#8B5CF6] hover:bg-gray-100"
@@ -536,7 +549,7 @@ const Index = () => {
               </div>
             </Card>
 
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-4 flex-wrap">
               <Button
                 variant="outline"
                 size="lg"
